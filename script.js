@@ -127,48 +127,45 @@ function groupBy(array, key) {
 function downloadPDF(categoryId, filename) {
   const source = document.getElementById(categoryId);
   const items = Array.from(source.querySelectorAll(".item-block"));
-
   if (items.length === 0) return;
 
-  // Create hidden printable container
   const printableContainer = document.createElement("div");
   printableContainer.style.width = "210mm";
   printableContainer.style.minHeight = "297mm";
   printableContainer.style.padding = "10mm";
   printableContainer.style.boxSizing = "border-box";
   printableContainer.style.background = "white";
-  printableContainer.style.display = "none";
+  printableContainer.style.display = "flex";
+  printableContainer.style.flexDirection = "column";
+  printableContainer.style.gap = "10mm";
+  printableContainer.style.position = "fixed";
+  printableContainer.style.top = "-9999px";
   printableContainer.id = "printable-grid";
   document.body.appendChild(printableContainer);
 
-  // Create rows of 2
   for (let i = 0; i < items.length; i += 2) {
     const row = document.createElement("div");
     row.style.display = "flex";
-    row.style.flexWrap = "nowrap";
     row.style.justifyContent = "space-between";
     row.style.gap = "10mm";
-    row.style.marginBottom = "10mm";
     row.style.pageBreakInside = "avoid";
 
     for (let j = 0; j < 2 && (i + j) < items.length; j++) {
       const original = items[i + j];
       const clone = original.cloneNode(true);
 
-      // Force overwrite styles
-      clone.style.flex = "0 0 calc((100% - 10mm) / 2)";
+      clone.style.flex = "1";
       clone.style.boxSizing = "border-box";
       clone.style.border = "1px solid #ccc";
       clone.style.borderRadius = "6px";
       clone.style.padding = "6mm";
-      clone.style.fontSize = "10pt";
+      clone.style.fontSize = "9pt";
+      clone.style.background = "white";
       clone.style.display = "flex";
       clone.style.flexDirection = "column";
+      clone.style.justifyContent = "flex-start";
       clone.style.alignItems = "center";
-      clone.style.justifyContent = "space-between";
-      clone.style.backgroundColor = "white";
 
-      // Fix image scaling
       const img = clone.querySelector("img");
       if (img) {
         img.style.maxWidth = "100%";
@@ -182,33 +179,40 @@ function downloadPDF(categoryId, filename) {
     printableContainer.appendChild(row);
   }
 
+  // Show container temporarily for rendering
   printableContainer.style.display = "block";
 
-  // Wait for images to load
+  // Wait for all images to load
   const images = printableContainer.querySelectorAll("img");
-  const imagePromises = Array.from(images).map(img => {
-    return new Promise(res => {
-      if (img.complete) res();
-      else img.onload = img.onerror = () => res();
-    });
-  });
+  const imagePromises = Array.from(images).map(img =>
+    new Promise(resolve => {
+      if (img.complete) resolve();
+      else img.onload = img.onerror = () => resolve();
+    })
+  );
 
   Promise.all(imagePromises).then(() => {
+    // Get full content height in pixels
+    const contentHeight = printableContainer.offsetHeight;
+    const a4HeightPx = 1122; // approx A4 @ 96dpi (html2canvas scale=1)
+
+    // Determine scale factor to fit height into A4
+    const scaleFactor = a4HeightPx / contentHeight;
+
     const opt = {
       margin: 0,
       filename: filename,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
-        scale: 2,
+        scale: 2 * scaleFactor, // scale down to fit height
         useCORS: true,
-        scrollY: 0,
-        logging: false
+        scrollY: 0
       },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     html2pdf().set(opt).from(printableContainer).save().then(() => {
-      document.body.removeChild(printableContainer); // Clean up
+      document.body.removeChild(printableContainer);
     });
   });
 }
