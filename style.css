@@ -99,6 +99,11 @@ main {
   margin: 1rem 0;
 }
 
+#category-section {
+  background-color: white;
+  padding: 20px;
+}
+
 .item-header {
   margin-bottom: 12px;
 }
@@ -118,24 +123,30 @@ main {
 }
 
 .item-block {
+  page-break-inside: avoid;
+  break-inside: avoid;     /* Firefox/Chrome */
+  padding: 10px;
+  margin-bottom: 16px;
   background: white;
-  margin: 1rem 0;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+  border-radius: 6px;
 }
 
+
 .item-image {
-  max-width: 350px;  /* increase from 150px to 250px */
-  height: auto;      /* maintain aspect ratio */
-  margin-bottom: 0.5rem;
   display: block;
+  max-width: 100%;
+  height: auto;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.5rem;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 th, td {
