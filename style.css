@@ -142,13 +142,13 @@ main {
 }
 
 .item-block img {
-  max-width: 100%;
+  max-width: 50%;
   height: auto;
   object-fit: contain;
 }
 
 table {
-  width: 100%;
+  width: 50%;
   border-collapse: collapse;
   margin-top: 0.5rem;
   page-break-inside: avoid;
