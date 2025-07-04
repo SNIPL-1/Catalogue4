@@ -130,58 +130,75 @@ function downloadPDF(categoryId, filename) {
 
   if (items.length === 0) return;
 
-  // Create hidden container
+  // Create hidden printable container
   const printableContainer = document.createElement("div");
   printableContainer.style.width = "210mm"; // A4 width
+  printableContainer.style.minHeight = "297mm";
   printableContainer.style.padding = "10mm";
   printableContainer.style.boxSizing = "border-box";
   printableContainer.style.display = "none";
+  printableContainer.style.background = "white";
   printableContainer.id = "printable-grid";
   document.body.appendChild(printableContainer);
 
-  // Group items into rows of 3
+  // Create rows of 3
   for (let i = 0; i < items.length; i += 3) {
     const row = document.createElement("div");
     row.style.display = "flex";
     row.style.justifyContent = "space-between";
-    row.style.marginBottom = "16px";
-    row.style.gap = "10px";
+    row.style.marginBottom = "12mm";
+    row.style.gap = "8mm";
+    row.style.pageBreakInside = "avoid"; // prevent row split
 
-    for (let j = 0; j < 3 && i + j < items.length; j++) {
+    for (let j = 0; j < 3 && (i + j) < items.length; j++) {
       const clone = items[i + j].cloneNode(true);
       clone.style.flex = "1";
-      clone.style.border = "1px solid #ccc";
-      clone.style.padding = "10px";
+      clone.style.minWidth = "0";
       clone.style.boxSizing = "border-box";
+      clone.style.border = "1px solid #ccc";
+      clone.style.borderRadius = "6px";
+      clone.style.padding = "6mm";
+      clone.style.fontSize = "10pt";
+      clone.style.display = "flex";
+      clone.style.flexDirection = "column";
+      clone.style.alignItems = "center";
+      clone.querySelector("img").style.maxWidth = "100%";
+      clone.querySelector("img").style.height = "auto";
+
       row.appendChild(clone);
     }
 
     printableContainer.appendChild(row);
   }
 
-  // Make it visible just for rendering
+  // Show container just for rendering
   printableContainer.style.display = "block";
 
   // Wait for images to load
   const images = printableContainer.querySelectorAll("img");
-  const promises = Array.from(images).map(img => {
+  const imagePromises = Array.from(images).map(img => {
     return new Promise(res => {
       if (img.complete) res();
       else img.onload = img.onerror = () => res();
     });
   });
 
-  Promise.all(promises).then(() => {
+  Promise.all(imagePromises).then(() => {
     const opt = {
-      margin:       0.5,
-      filename:     filename,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      margin: 0,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        logging: false
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     html2pdf().set(opt).from(printableContainer).save().then(() => {
-      document.body.removeChild(printableContainer); // cleanup
+      document.body.removeChild(printableContainer); // Clean up
     });
   });
 }
