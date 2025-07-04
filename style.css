@@ -133,12 +133,7 @@ main {
 
 .item-block {
   page-break-inside: avoid;
-  break-inside: avoid;     /* Firefox/Chrome */
-  padding: 10px;
-  margin-bottom: 16px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  break-inside: avoid;
 }
 
 
