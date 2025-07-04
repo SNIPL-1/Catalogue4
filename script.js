@@ -128,7 +128,6 @@ function downloadPDF(categoryId, filename) {
   const element = document.getElementById(categoryId);
   const images = element.querySelectorAll("img");
 
-  // Convert NodeList to Array of Promises
   const imageLoadPromises = Array.from(images).map(img => {
     return new Promise(resolve => {
       if (img.complete) {
@@ -147,7 +146,7 @@ function downloadPDF(categoryId, filename) {
       html2canvas: {
         scale: 2,
         useCORS: true,
-        allowTaint: false,
+        scrollY: 0
       },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
