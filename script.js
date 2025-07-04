@@ -130,9 +130,9 @@ function downloadPDF(categoryId, filename) {
 
   if (items.length === 0) return;
 
-  // Create a hidden container
+  // Create hidden printable container
   const printableContainer = document.createElement("div");
-  printableContainer.style.width = "210mm"; // A4 width
+  printableContainer.style.width = "210mm";
   printableContainer.style.minHeight = "297mm";
   printableContainer.style.padding = "10mm";
   printableContainer.style.boxSizing = "border-box";
@@ -141,7 +141,7 @@ function downloadPDF(categoryId, filename) {
   printableContainer.id = "printable-grid";
   document.body.appendChild(printableContainer);
 
-  // Create rows with 2 items per row
+  // Create rows of 2
   for (let i = 0; i < items.length; i += 2) {
     const row = document.createElement("div");
     row.style.display = "flex";
@@ -152,11 +152,11 @@ function downloadPDF(categoryId, filename) {
     row.style.pageBreakInside = "avoid";
 
     for (let j = 0; j < 2 && (i + j) < items.length; j++) {
-      const clone = items[i + j].cloneNode(true);
+      const original = items[i + j];
+      const clone = original.cloneNode(true);
 
-      // Force style to avoid overflow
-      clone.style.flex = "1";
-      clone.style.minWidth = "0";
+      // Force overwrite styles
+      clone.style.flex = "0 0 calc((100% - 10mm) / 2)";
       clone.style.boxSizing = "border-box";
       clone.style.border = "1px solid #ccc";
       clone.style.borderRadius = "6px";
@@ -166,7 +166,9 @@ function downloadPDF(categoryId, filename) {
       clone.style.flexDirection = "column";
       clone.style.alignItems = "center";
       clone.style.justifyContent = "space-between";
+      clone.style.backgroundColor = "white";
 
+      // Fix image scaling
       const img = clone.querySelector("img");
       if (img) {
         img.style.maxWidth = "100%";
@@ -180,10 +182,9 @@ function downloadPDF(categoryId, filename) {
     printableContainer.appendChild(row);
   }
 
-  // Show the container temporarily for rendering
   printableContainer.style.display = "block";
 
-  // Wait for all images to load
+  // Wait for images to load
   const images = printableContainer.querySelectorAll("img");
   const imagePromises = Array.from(images).map(img => {
     return new Promise(res => {
@@ -207,7 +208,7 @@ function downloadPDF(categoryId, filename) {
     };
 
     html2pdf().set(opt).from(printableContainer).save().then(() => {
-      document.body.removeChild(printableContainer); // cleanup
+      document.body.removeChild(printableContainer); // Clean up
     });
   });
 }
