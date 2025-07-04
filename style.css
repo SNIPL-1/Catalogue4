@@ -135,7 +135,7 @@ main {
 
 .item-image {
   display: block;
-  max-width: 350px;
+  max-width: 100%;
   height: auto;
   page-break-inside: avoid;
   break-inside: avoid;
