@@ -130,28 +130,31 @@ function downloadPDF(categoryId, filename) {
 
   if (items.length === 0) return;
 
-  // Create hidden printable container
+  // Create a hidden container
   const printableContainer = document.createElement("div");
   printableContainer.style.width = "210mm"; // A4 width
   printableContainer.style.minHeight = "297mm";
   printableContainer.style.padding = "10mm";
   printableContainer.style.boxSizing = "border-box";
-  printableContainer.style.display = "none";
   printableContainer.style.background = "white";
+  printableContainer.style.display = "none";
   printableContainer.id = "printable-grid";
   document.body.appendChild(printableContainer);
 
-  // Create rows of 3
-  for (let i = 0; i < items.length; i += 3) {
+  // Create rows with 2 items per row
+  for (let i = 0; i < items.length; i += 2) {
     const row = document.createElement("div");
     row.style.display = "flex";
+    row.style.flexWrap = "nowrap";
     row.style.justifyContent = "space-between";
-    row.style.marginBottom = "12mm";
-    row.style.gap = "8mm";
-    row.style.pageBreakInside = "avoid"; // prevent row split
+    row.style.gap = "10mm";
+    row.style.marginBottom = "10mm";
+    row.style.pageBreakInside = "avoid";
 
-    for (let j = 0; j < 3 && (i + j) < items.length; j++) {
+    for (let j = 0; j < 2 && (i + j) < items.length; j++) {
       const clone = items[i + j].cloneNode(true);
+
+      // Force style to avoid overflow
       clone.style.flex = "1";
       clone.style.minWidth = "0";
       clone.style.boxSizing = "border-box";
@@ -162,8 +165,14 @@ function downloadPDF(categoryId, filename) {
       clone.style.display = "flex";
       clone.style.flexDirection = "column";
       clone.style.alignItems = "center";
-      clone.querySelector("img").style.maxWidth = "100%";
-      clone.querySelector("img").style.height = "auto";
+      clone.style.justifyContent = "space-between";
+
+      const img = clone.querySelector("img");
+      if (img) {
+        img.style.maxWidth = "100%";
+        img.style.height = "auto";
+        img.style.objectFit = "contain";
+      }
 
       row.appendChild(clone);
     }
@@ -171,10 +180,10 @@ function downloadPDF(categoryId, filename) {
     printableContainer.appendChild(row);
   }
 
-  // Show container just for rendering
+  // Show the container temporarily for rendering
   printableContainer.style.display = "block";
 
-  // Wait for images to load
+  // Wait for all images to load
   const images = printableContainer.querySelectorAll("img");
   const imagePromises = Array.from(images).map(img => {
     return new Promise(res => {
@@ -198,7 +207,7 @@ function downloadPDF(categoryId, filename) {
     };
 
     html2pdf().set(opt).from(printableContainer).save().then(() => {
-      document.body.removeChild(printableContainer); // Clean up
+      document.body.removeChild(printableContainer); // cleanup
     });
   });
 }
