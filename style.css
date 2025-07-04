@@ -134,15 +134,17 @@ main {
 .item-block {
   page-break-inside: avoid;
   break-inside: avoid;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 6mm;
+  box-sizing: border-box;
+  font-size: 10pt;
 }
 
-
-.item-image {
-  display: block;
+.item-block img {
   max-width: 100%;
   height: auto;
-  page-break-inside: avoid;
-  break-inside: avoid;
+  object-fit: contain;
 }
 
 table {
