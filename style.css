@@ -99,9 +99,18 @@ main {
   margin: 1rem 0;
 }
 
-#category-section {
-  background-color: white;
-  padding: 20px;
+#category-section .item-block {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+#printable-grid {
+  font-family: sans-serif;
+}
+
+#printable-grid .item-block img {
+  max-width: 100%;
+  height: auto;
 }
 
 .item-header {
