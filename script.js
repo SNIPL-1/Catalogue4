@@ -125,32 +125,63 @@ function groupBy(array, key) {
 }
 
 function downloadPDF(categoryId, filename) {
-  const element = document.getElementById(categoryId);
-  const images = element.querySelectorAll("img");
+  const source = document.getElementById(categoryId);
+  const items = Array.from(source.querySelectorAll(".item-block"));
 
-  const imageLoadPromises = Array.from(images).map(img => {
-    return new Promise(resolve => {
-      if (img.complete) {
-        resolve();
-      } else {
-        img.onload = img.onerror = () => resolve();
-      }
+  if (items.length === 0) return;
+
+  // Create hidden container
+  const printableContainer = document.createElement("div");
+  printableContainer.style.width = "210mm"; // A4 width
+  printableContainer.style.padding = "10mm";
+  printableContainer.style.boxSizing = "border-box";
+  printableContainer.style.display = "none";
+  printableContainer.id = "printable-grid";
+  document.body.appendChild(printableContainer);
+
+  // Group items into rows of 3
+  for (let i = 0; i < items.length; i += 3) {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.marginBottom = "16px";
+    row.style.gap = "10px";
+
+    for (let j = 0; j < 3 && i + j < items.length; j++) {
+      const clone = items[i + j].cloneNode(true);
+      clone.style.flex = "1";
+      clone.style.border = "1px solid #ccc";
+      clone.style.padding = "10px";
+      clone.style.boxSizing = "border-box";
+      row.appendChild(clone);
+    }
+
+    printableContainer.appendChild(row);
+  }
+
+  // Make it visible just for rendering
+  printableContainer.style.display = "block";
+
+  // Wait for images to load
+  const images = printableContainer.querySelectorAll("img");
+  const promises = Array.from(images).map(img => {
+    return new Promise(res => {
+      if (img.complete) res();
+      else img.onload = img.onerror = () => res();
     });
   });
 
-  Promise.all(imageLoadPromises).then(() => {
+  Promise.all(promises).then(() => {
     const opt = {
-      margin: 0.5,
-      filename: filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0
-      },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      margin:       0.5,
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(printableContainer).save().then(() => {
+      document.body.removeChild(printableContainer); // cleanup
+    });
   });
 }
